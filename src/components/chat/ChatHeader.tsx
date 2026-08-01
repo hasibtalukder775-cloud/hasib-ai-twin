@@ -45,7 +45,7 @@ export function ChatHeader({ onToggleSidebar, sidebarOpen }: ChatHeaderProps) {
           "rounded-full border border-border px-3 py-1 text-xs text-muted-foreground",
         )}
       >
-        Demo mode
+        Hasib AI Twin
       </div>
     </header>
   );

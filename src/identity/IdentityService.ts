@@ -41,7 +41,7 @@ export class IdentityService {
       capabilities: [
         "Personal AI Twin conversations",
         "Creator introduction",
-        "Demo-mode assistance",
+        "Local assistant support",
         "Future memory and knowledge integration",
       ],
     };

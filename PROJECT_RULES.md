@@ -74,7 +74,43 @@ New documentation or planning files should live in the root-level docs folder an
 - Preserve existing architecture and application behavior unless explicitly instructed.
 - Commit changes with clear, descriptive messages.
 
-## 11. Documentation Rules
+## 11. Git Workflow
+Every completed feature must follow this sequence:
+1. Test locally
+2. npm run lint
+3. npm run build
+4. git add .
+5. git commit -m "Feature: <name>"
+6. git push
+
+Never start the next feature before the current feature has been:
+- Tested
+- Committed
+- Pushed to GitHub
+
+If any step fails (lint, build, commit, or push), stop and fix the issue before continuing.
+
+## 12. Development Rules
+- One feature at a time.
+- Explain the implementation before writing code.
+- Never refactor the project architecture without approval.
+- Prefer reusable components over duplicated code.
+- Never hardcode secrets or API keys.
+- Preserve backward compatibility unless explicitly approved.
+
+## 13. AI Assistant Rules
+- Copilot generates code.
+- Hasib is the Project Architect.
+- Never make architectural decisions without approval.
+- Always keep the project scalable and modular.
+
+## 14. Safety Rules
+- Never delete existing files unless explicitly instructed.
+- Never rename folders without approval.
+- Never modify unrelated files.
+- Keep changes minimal and isolated.
+
+## 15. Documentation Rules
 - Keep documentation accurate, concise, and aligned with the current implementation.
 - Update docs when architecture or workflow changes are introduced.
 - Use clear headings and examples for maintainability.
