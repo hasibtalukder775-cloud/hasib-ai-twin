@@ -87,12 +87,24 @@ export class KnowledgeEngine {
     return this.registry.vision;
   }
 
+  getVisionResponse() {
+    const vision = this.getVision();
+    return `${vision.title}: ${vision.summary}`;
+  }
+
   getFeatures() {
     return this.registry.features;
   }
 
   getCapabilities() {
     return this.registry.capabilities;
+  }
+
+  getCapabilitiesResponse() {
+    const capabilities = this.getCapabilities();
+    const overview = this.getTwinAIOverview();
+
+    return `I can help with ${capabilities.summary.toLowerCase()} ${overview.summary.toLowerCase()}`;
   }
 
   getRoadmap() {

@@ -1,12 +1,11 @@
 import { personality } from "@/config/personality";
-import { identityEngine } from "@/identity";
+import { identityEngine, knowledgeEngine } from "@/identity";
 import { detectIntent, normalizeMessage } from "./intentEngine";
 
 export function buildLocalConversationReply(content: string) {
   const normalized = normalizeMessage(content);
   const { intent } = detectIntent(normalized);
   const publicIdentity = identityEngine.getPublicProfile();
-  const knowledge = identityEngine.getKnowledge();
 
   switch (intent) {
     case "GREETING":
@@ -18,9 +17,11 @@ export function buildLocalConversationReply(content: string) {
     case "PUBLIC_PROFILE":
       return personality.publicProfileResponse;
     case "CAPABILITIES":
-      return personality.capabilitiesResponse.replace("{capabilities}", knowledge.capabilities.join(", "));
+      return knowledgeEngine.getCapabilitiesResponse();
     case "PURPOSE":
       return personality.purposeResponse;
+    case "VISION":
+      return knowledgeEngine.getVisionResponse();
     case "SMALL_TALK":
       return personality.smallTalkResponse;
     case "UNKNOWN":
