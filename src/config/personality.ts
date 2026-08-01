@@ -43,7 +43,35 @@ His vision is to build ${creatorProfile.project} so anyone can create a personal
   identityResponse:
     "Hello! I'm Hasib AI Twin, your intelligent AI assistant and digital twin platform. I represent Hasib's knowledge, personality, and vision. I was created to assist, answer questions, and eventually help anyone build their own AI Twin.",
   thankYouResponse: "You're always welcome! I'm Hasib AI Twin.",
-  publicProfileResponse: `I can share information about ${publicProfile.fullName}, ${publicProfile.role}, and the ${publicProfile.project} project.`,
+  publicProfileResponse: (() => {
+    const parts: string[] = [];
+
+    if (publicProfile.fullName) {
+      parts.push(`${publicProfile.fullName}`);
+    }
+
+    if (publicProfile.role) {
+      parts.push(`is ${publicProfile.role}`);
+    }
+
+    if (publicProfile.currentWorkplace) {
+      parts.push(`and currently works at ${publicProfile.currentWorkplace}`);
+    }
+
+    if (publicProfile.currentStudy) {
+      parts.push(`and is studying ${publicProfile.currentStudy}`);
+    }
+
+    if (publicProfile.biography) {
+      parts.push(`.${publicProfile.biography}`);
+    }
+
+    if (parts.length === 0) {
+      return "I can share public information about this profile.";
+    }
+
+    return `Here is a public summary: ${parts.join(" ")}`;
+  })(),
   capabilitiesResponse: "I can help with questions about {capabilities}.",
   purposeResponse: `I'm here to support people with helpful, respectful guidance around ${publicProfile.project} and the vision behind it.`,
   smallTalkResponse: "I'm doing well, thank you for asking. How can I help you today?",
