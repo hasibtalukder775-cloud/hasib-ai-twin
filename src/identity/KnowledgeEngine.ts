@@ -1,114 +1,72 @@
-export type KnowledgeTopicKey = "twinai" | "hasibAi" | "purpose" | "vision" | "features" | "capabilities" | "roadmap";
+import { KnowledgeRegistry } from "@/knowledge/core/KnowledgeRegistry";
+import { InMemoryKnowledgeStore } from "@/knowledge/storage/InMemoryKnowledgeStore";
+import { KnowledgeRetriever } from "@/knowledge/retrieval/KnowledgeRetriever";
+import type { KnowledgePayload, KnowledgeResponse, KnowledgeResponseOptions, KnowledgeTopic, KnowledgeTopicKey } from "@/knowledge/types/knowledge";
+import { normalizeTopicKey } from "@/knowledge/utils/knowledgeUtils";
 
-export type KnowledgeTopic = {
-  title: string;
-  summary: string;
-  details: string[];
-};
-
-export type KnowledgePayload = {
-  overview: KnowledgeTopic;
-  purpose: KnowledgeTopic;
-  vision: KnowledgeTopic;
-  features: KnowledgeTopic;
-  capabilities: KnowledgeTopic;
-  roadmap: KnowledgeTopic;
-};
-
-const knowledgeRegistry: Record<KnowledgeTopicKey, KnowledgeTopic> = {
-  twinai: {
-    title: "TwinAI",
-    summary: "TwinAI is a personal AI twin platform focused on identity, knowledge, and interaction.",
-    details: ["Built as a modular assistant experience.", "Designed for future provider integration.", "Supports a consistent public identity layer."],
-  },
-  hasibAi: {
-    title: "Hasib AI",
-    summary: "Hasib AI represents the public identity and personality layer of the assistant experience.",
-    details: ["Built around Hasib's public profile.", "Structured to remain consistent across UI and conversation flows.", "Designed for future expansion."],
-  },
-  purpose: {
-    title: "Purpose",
-    summary: "The purpose of the project is to create a personal AI twin that can remember, learn, and assist.",
-    details: ["Provide helpful and respectful assistance.", "Support a digital twin experience.", "Create a reusable architecture for future AI upgrades."],
-  },
-  vision: {
-    title: "Vision",
-    summary: "The vision is to make personal AI twin experiences accessible and modular.",
-    details: ["Help people build a personal AI companion.", "Keep the project extensible.", "Preserve a stable identity layer."],
-  },
-  features: {
-    title: "Features",
-    summary: "The platform currently supports a chat interface, identity presentation, and local conversation handling.",
-    details: ["Landing page and login experience.", "Chat UI with local conversation replies.", "Identity and knowledge scaffolding."],
-  },
-  capabilities: {
-    title: "Capabilities",
-    summary: "The current assistant can answer identity, creator, and profile-related questions locally.",
-    details: ["Recognize common greeting and identity intents.", "Respond to creator and public profile questions.", "Route knowledge via structured services."],
-  },
-  roadmap: {
-    title: "Roadmap",
-    summary: "The roadmap focuses on expanding the knowledge layer and later enriching responses with external providers.",
-    details: ["Expand structured knowledge topics.", "Add richer memory and personalization.", "Introduce provider-based enrichment later."],
-  },
-};
+export type { KnowledgePayload, KnowledgeResponse, KnowledgeResponseOptions, KnowledgeTopic, KnowledgeTopicKey } from "@/knowledge/types/knowledge";
 
 export class KnowledgeEngine {
-  private readonly registry: Record<KnowledgeTopicKey, KnowledgeTopic>;
+  private readonly registry: KnowledgeRegistry;
+  private readonly store: InMemoryKnowledgeStore;
+  private readonly retriever: KnowledgeRetriever;
 
-  constructor(registry = knowledgeRegistry) {
-    this.registry = registry;
+  constructor(registry: KnowledgeRegistry | Record<KnowledgeTopicKey, KnowledgeTopic> = new KnowledgeRegistry()) {
+    this.registry = registry instanceof KnowledgeRegistry ? registry : new KnowledgeRegistry(registry);
+    this.store = new InMemoryKnowledgeStore(this.registry.getAllTopics());
+    this.retriever = new KnowledgeRetriever(this.store);
   }
 
   getKnowledgePayload(): KnowledgePayload {
-    return {
-      overview: this.registry.twinai,
-      purpose: this.registry.purpose,
-      vision: this.registry.vision,
-      features: this.registry.features,
-      capabilities: this.registry.capabilities,
-      roadmap: this.registry.roadmap,
-    };
+    return this.registry.getPayload();
   }
 
   getTwinAIOverview() {
-    return this.registry.twinai;
+    return this.getTopic("twinai");
   }
 
   getHasibAIDescription() {
-    return this.registry.hasibAi;
+    return this.getTopic("hasibAi");
   }
 
   getPurpose() {
-    return this.registry.purpose;
+    return this.getTopic("purpose");
   }
 
   getVision() {
-    return this.registry.vision;
-  }
-
-  getVisionResponse() {
-    const vision = this.getVision();
-    return `${vision.title}: ${vision.summary}`;
+    return this.getTopic("vision");
   }
 
   getFeatures() {
-    return this.registry.features;
+    return this.getTopic("features");
   }
 
   getCapabilities() {
-    return this.registry.capabilities;
-  }
-
-  getCapabilitiesResponse() {
-    const capabilities = this.getCapabilities();
-    const overview = this.getTwinAIOverview();
-
-    return `I can help with ${capabilities.summary.toLowerCase()} ${overview.summary.toLowerCase()}`;
+    return this.getTopic("capabilities");
   }
 
   getRoadmap() {
-    return this.registry.roadmap;
+    return this.getTopic("roadmap");
+  }
+
+  getTopic(topicKey: KnowledgeTopicKey) {
+    return this.store.get(topicKey);
+  }
+
+  getTopicResponse(topicKey: KnowledgeTopicKey, options: KnowledgeResponseOptions = {}): KnowledgeResponse {
+    return this.retriever.retrieve(topicKey, options);
+  }
+
+  getVisionResponse() {
+    return this.getTopicResponse("vision").text;
+  }
+
+  getCapabilitiesResponse() {
+    return this.getTopicResponse("capabilities").text;
+  }
+
+  getTwinAIOverviewResponse() {
+    return this.getTopicResponse("twinai").text;
   }
 
   findTopic(topic?: string) {
@@ -116,8 +74,8 @@ export class KnowledgeEngine {
       return this.getKnowledgePayload();
     }
 
-    const normalizedTopic = topic.toLowerCase() as KnowledgeTopicKey;
-    return this.registry[normalizedTopic] ?? null;
+    const normalizedTopic = normalizeTopicKey(topic);
+    return normalizedTopic ? this.getTopic(normalizedTopic) : null;
   }
 
   getCreator() {
